@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Talent.Common.Aws;
 using Talent.Common.Contracts;
+using System.Web;
+
 
 namespace Talent.Common.Services
 {
@@ -25,23 +27,37 @@ namespace Talent.Common.Services
             _awsService = awsService;
         }
 
-        public async Task<string> GetFileURL(string id, FileType type)
-        {
-            //Your code here;
-            throw new NotImplementedException();
-        }
-
         public async Task<string> SaveFile(IFormFile file, FileType type)
         {
-            //Your code here;
-            throw new NotImplementedException();
+
+            var filePath = Path.Combine(_environment.ContentRootPath , _tempFolder, file.FileName);
+            using (var stream = File.Create(filePath))
+            {
+                await file.CopyToAsync(stream);
+            }
+            return filePath;
+            
         }
+
 
         public async Task<bool> DeleteFile(string id, FileType type)
         {
-            //Your code here;
-            throw new NotImplementedException();
+            if (File.Exists(id))
+            {
+                File.Delete(id);
+                return true;
+            }
+            return false;
         }
+
+        public async Task<string> GetFileURL(string id, FileType type)
+        {
+            var url = Path.Combine(_tempFolder, Path.GetFileName(id));
+            return url;
+        }
+
+        
+
 
 
         #region Document Save Methods
